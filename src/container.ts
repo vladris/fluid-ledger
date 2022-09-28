@@ -8,17 +8,17 @@ export class FluidClient {
     async initialize() {
         const client = new TinyliciousClient();
         const containerSchema = {
-        initialObjects: { myLedger: Ledger }
+            initialObjects: { myLedger: Ledger }
         };
 
         let container: IFluidContainer;
         const containerId = window.location.hash.substring(1);
         if (!containerId) {
-        ({ container } = await client.createContainer(containerSchema));
-        const id = await container.attach();
-        window.location.hash = id;
+            ({ container } = await client.createContainer(containerSchema));
+            const id = await container.attach();
+            window.location.hash = id;
         } else {
-        ({ container } = await client.getContainer(containerId, containerSchema));
+            ({ container } = await client.getContainer(containerId, containerSchema));
         }
 
         this.myLedger = container.initialObjects.myLedger as Ledger;
