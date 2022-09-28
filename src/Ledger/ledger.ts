@@ -109,13 +109,13 @@ export class Ledger<T = any> extends SharedObject<ILedgerEvents<T>>
         }
     }
 
-    protected applyStashedOp(content: unknown) {
-        const op = content as ILedgerOperation;
-        this.applyInnerOp(op);
-    }
-
     private appendCore(value: Serializable<T>) {
         this.data.push(value);
         this.emit("append", value);
+    }
+
+    protected applyStashedOp(content: unknown) {
+        // We don't support offline mode
+        throw Error("Not supported");
     }
 }
