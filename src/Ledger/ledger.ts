@@ -56,12 +56,20 @@ export class Ledger<T = any> extends SharedObject<ILedgerEvents<T>>
     public append(value: Serializable<T>) {
         const opValue = this.serializer.encode(value, this.handle);
 
-        const op: IAppendOperation = {
-            type: "append",
-            value: opValue
-        };
+        // We have very different code paths depending on whether container is attached or not.
+        // When attached, we submit the op and only update data once the op gets sequenced.
+        if (this.isAttached()) {
+            const op: IAppendOperation = {
+                type: "append",
+                value: opValue
+            };
 
-        this.applyInnerOp(op);
+            this.applyInnerOp(op);
+        }
+        // If container is detached, we update data right away and emit the append event.
+        else {
+            this.appendCore(opValue);
+        }
     }
 
     protected summarizeCore(serializer: IFluidSerializer): ISummaryTreeWithStats {
@@ -97,13 +105,17 @@ export class Ledger<T = any> extends SharedObject<ILedgerEvents<T>>
         // We append them to the list in the order they arrive and emit "append" events for each. 
         if (message.type === MessageType.Operation) {
             const op = message.contents as ILedgerOperation;
-            this.data.push(op.value);
-            this.emit("append", op.value);
+            this.appendCore(op.value);
         }
     }
 
     protected applyStashedOp(content: unknown) {
         const op = content as ILedgerOperation;
         this.applyInnerOp(op);
+    }
+
+    private appendCore(value: Serializable<T>) {
+        this.data.push(value);
+        this.emit("append", value);
     }
 }
