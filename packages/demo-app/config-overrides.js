@@ -1,3 +1,5 @@
+const path = require("path");
+
 module.exports = function override(config, env) {
     if (!config.resolve) {
       config.resolve = {};
@@ -8,8 +10,13 @@ module.exports = function override(config, env) {
     }
   
     config.resolve.fallback.buffer = require.resolve('buffer/');
-  
-    //do stuff with the webpack config...
+
+    config.resolve.modules = [
+      path.join(__dirname, ".."),
+      path.join(__dirname, "..", ".."),
+      path.join(__dirname, "..", "dds"),
+      ...config.resolve.modules
+    ]
+
     return config;
 };
-  
