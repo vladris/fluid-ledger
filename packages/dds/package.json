@@ -2,6 +2,7 @@
   "name": "@fluid-ledger/dds",
   "version": "0.0.1",
   "description": "Fluid Framework append-only list distributed data structure",
+  "main": "index.js",
   "dependencies": {
     "fluid-framework": "^1.2.7"
   },
@@ -12,6 +13,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vladris/LedgerDDS.git"
+    "url": "git+https://github.com/vladris/fluid-ledger.git"
   }
 }

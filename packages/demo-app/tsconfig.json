@@ -3,6 +3,10 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
-    "outDir": "../../t"
-  }
+    "rootDir": "src"
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../dds/tsconfig.json" }
+  ]
 }

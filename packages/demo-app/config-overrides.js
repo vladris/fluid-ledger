@@ -1,22 +1,27 @@
-const path = require("path");
+const { override } = require('customize-cra');
+const path = require('path');
 
-module.exports = function override(config, env) {
-    if (!config.resolve) {
-      config.resolve = {};
+const overridePath = (webpackConfig) => {
+  const oneOfRule = webpackConfig.module.rules.find((rule) => rule.oneOf);
+  if (oneOfRule) {
+    const newIncludePaths = [
+      path.resolve(__dirname, '../dds'),
+      path.resolve(__dirname, '../dds/src'),
+    ];
+
+    const tsxRule = oneOfRule.oneOf.find(
+      (rule) => rule.test && rule.test.toString().includes('tsx')
+    );
+
+    if (tsxRule) {
+      if (Array.isArray(tsxRule.include)) {
+        tsxRule.include = [...tsxRule.include, ...newIncludePaths];
+      } else {
+        tsxRule.include = [tsxRule.include, ...newIncludePaths];
+      }
     }
-  
-    if (!config.resolve.fallback) {
-      config.resolve.fallback = {};
-    }
-  
-    config.resolve.fallback.buffer = require.resolve('buffer/');
-
-    config.resolve.modules = [
-      path.join(__dirname, ".."),
-      path.join(__dirname, "..", ".."),
-      path.join(__dirname, "..", "dds"),
-      ...config.resolve.modules
-    ]
-
-    return config;
+  }
+  return webpackConfig;
 };
+
+module.exports = override(overridePath);

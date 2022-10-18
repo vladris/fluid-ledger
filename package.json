@@ -3,13 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "workspaces": [
-    "packages/dds",
-    "packages/demo-app"
+    "packages/*"
   ],
+  "scripts": {
+    "build": "npm run build --ws"
+  },
   "author": "Vlad Riscutia",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vladris/LedgerDDS.git"
+    "url": "git+https://github.com/vladris/fluid-ledger.git"
   }
 }
