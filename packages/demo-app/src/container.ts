@@ -1,6 +1,6 @@
 import TinyliciousClient from '@fluidframework/tinylicious-client';
 import { IFluidContainer } from 'fluid-framework';
-import { Ledger } from './Ledger/ledger';
+import { Ledger } from '@fluid-ledger/dds/src';
 
 export class FluidClient {
     private myLedger: Ledger | undefined;
