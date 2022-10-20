@@ -2,7 +2,7 @@
   "name": "@fluid-ledger/dds",
   "version": "0.0.1",
   "description": "Fluid Framework append-only list distributed data structure",
-  "main": "index.js",
+  "main": "lib/index.js",
   "dependencies": {
     "fluid-framework": "^1.2.7"
   },

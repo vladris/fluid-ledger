@@ -15,9 +15,10 @@
     "url": "^0.11.0"
   },
   "scripts": {
-    "start": "craco start",
+    "start": "npm run start:server 7070 & npm run start:client",
+    "start:client": "craco start",
+    "start:server": "npx tinylicious@latest",
     "build": "craco build",
-    "test": "craco test",
     "eject": "craco eject"
   },
   "eslintConfig": {

@@ -6,9 +6,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "@fluid-ledger/*": ["./packages/*/src"]
-    }
+    "noFallthroughCasesInSwitch": true
   }
 }

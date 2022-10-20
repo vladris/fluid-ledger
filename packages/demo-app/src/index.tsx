@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { FluidClient } from "./container";
-import { Ledger } from "@fluid-ledger/dds/src"
+import { Ledger } from "@fluid-ledger/dds"
 
 async function setup() {
     const fc = new FluidClient();
