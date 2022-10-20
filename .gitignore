@@ -1,6 +1,5 @@
 node_modules/**
-build/**
-dist/**
+packages/dds/lib/**
 packages/demo-app/build/**
 packages/demo-app/node_modules/**
 tsconfig.tsbuildinfo
