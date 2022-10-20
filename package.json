@@ -6,7 +6,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --ws"
+    "build": "npm run build --ws",
+    "start": "npm run start --w=@fluid-ledger/demo-app"
   },
   "author": "Vlad Riscutia",
   "license": "MIT",
