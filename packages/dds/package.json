@@ -7,12 +7,17 @@
     "fluid-framework": "^1.2.7"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "build:test": "tsc --project ./src/test/tsconfig.json",
+    "test": "jest"
   },
   "author": "Vlad Riscutia",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vladris/fluid-ledger.git"
+  },
+  "devDependencies": {
+    "jest": "^29.2.1"
   }
 }
