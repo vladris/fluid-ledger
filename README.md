@@ -1,7 +1,7 @@
 # Fluid Ledger
 
 Ledger is a simple append-only list distributed data structure (DDS) for
-[Fluid Framework](htpps://fluidframework.com).
+[Fluid Framework](https://fluidframework.com).
 
 The DDS package code is in `/packages/dds`.
 
