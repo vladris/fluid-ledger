@@ -1,4 +1,5 @@
 **/node_modules/**
+packages/dds/coverage/**
 packages/dds/lib/**
 packages/dds/test/**
 packages/demo-app/build/**

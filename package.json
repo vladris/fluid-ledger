@@ -8,7 +8,7 @@
   "scripts": {
     "build": "npm run build --ws",
     "start": "npm run start --w=@fluid-ledger/demo-app",
-    "test": "npm run test --w=@fluid-ledger/dds"
+    "test": "npm run test --ws --if-present"
   },
   "author": "Vlad Riscutia",
   "license": "MIT",
