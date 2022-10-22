@@ -8,7 +8,7 @@ async function setup() {
 
     await fc.initialize();
 
-    fc.getLedger().on('append', (value) => {
+    fc.getLedger().on("append", (value) => {
         console.log(value);
     });
 
@@ -29,6 +29,7 @@ ReactDOM.render(
                 console.log(item);
             }
         }}>Iterate</button>
-    </React.StrictMode>,
-    document.getElementById('root')
+    </React.StrictMode>, 
+
+    document.getElementById("root")
 );

@@ -1,18 +1,20 @@
-import { AzureClient, AzureLocalConnectionConfig } from '@fluidframework/azure-client';
-import { IFluidContainer } from 'fluid-framework';
-import { Ledger } from '@fluid-ledger/dds';
-import { InsecureTokenProvider } from '@fluidframework/test-client-utils';
-
+import {
+    AzureClient,
+    AzureLocalConnectionConfig
+} from "@fluidframework/azure-client";
+import { IFluidContainer } from "fluid-framework";
+import { Ledger } from "@fluid-ledger/dds";
+import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 
 const user = {
     id: "userId",
     name: "userName"
-}
+};
 
 const localConnectionConfig: AzureLocalConnectionConfig = {
     type: "local",
     tokenProvider: new InsecureTokenProvider("", user),
-    endpoint: "http://localhost:7070",
+    endpoint: "http://localhost:7070"
 };
 
 export class FluidClient {
@@ -31,7 +33,10 @@ export class FluidClient {
             const id = await container.attach();
             window.location.hash = id;
         } else {
-            ({ container } = await client.getContainer(containerId, containerSchema));
+            ({ container } = await client.getContainer(
+                containerId,
+                containerSchema
+            ));
         }
 
         this.myLedger = container.initialObjects.myLedger as Ledger;
@@ -39,10 +44,9 @@ export class FluidClient {
 
     getLedger() {
         if (!this.myLedger) {
-            throw Error('initialize() was not called');
+            throw Error("initialize() was not called");
         }
 
         return this.myLedger;
     }
 }
-  
