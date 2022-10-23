@@ -1,6 +1,6 @@
 {
   "name": "fluid-ledger",
-  "version": "0.0.1",
+  "private": "true",
   "workspaces": [
     "packages/*"
   ],
@@ -9,9 +9,6 @@
     "start": "npm run start --w=@fluid-ledger/demo-app",
     "test": "npm run test --ws --if-present"
   },
-  "files": [
-    "./packages/dds/*"
-  ],
   "author": "Vlad Riscutia",
   "license": "MIT",
   "repository": {
