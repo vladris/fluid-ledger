@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@fluid-ledger/dds": "^0.0.1",
+    "@fluid-ledger/dds": "^0.0.2",
     "@fluidframework/azure-client": "^1.1.0",
     "@fluidframework/test-client-utils": "^1.3.0",
     "@testing-library/jest-dom": "^5.16.5",
