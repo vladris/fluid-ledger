@@ -9,7 +9,7 @@ Clients submit appends to the DDS but the underlying list gets update only
 after the op has been sequenced by the service. This ensures all clients end up
 with the same ordering of objects in the list.
 
-The DDS provides an `append` even which fires whenever a new item is appended
+The DDS provides an `append` event which fires whenever a new item is appended
 to the list. Listeners can use this to react to changes.
 
 The DDS provides a `get()` method which returns an iterable iterator over the
