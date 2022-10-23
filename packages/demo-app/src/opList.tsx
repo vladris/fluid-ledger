@@ -1,4 +1,4 @@
-import { Ledger } from "@fluid-ledger/dds";
+import { Ledger } from "fluid-ledger-dds";
 import { useEffect, useRef } from "react";
 import { ColorOperation } from "./colorOperation";
 

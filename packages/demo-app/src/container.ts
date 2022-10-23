@@ -3,7 +3,7 @@ import {
     AzureLocalConnectionConfig
 } from "@fluidframework/azure-client";
 import { IFluidContainer } from "fluid-framework";
-import { Ledger } from "@fluid-ledger/dds";
+import { Ledger } from "fluid-ledger-dds";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { ColorOperation } from "./colorOperation";
 

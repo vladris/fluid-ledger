@@ -1,4 +1,4 @@
-import { Ledger } from "@fluid-ledger/dds";
+import { Ledger } from "fluid-ledger-dds";
 import { useState } from "react";
 import ReactDOM from "react-dom/client";
 import { ColoringCanvas } from "./coloringCanvas";
