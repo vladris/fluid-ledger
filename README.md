@@ -6,6 +6,28 @@
 [Fluid Framework](https://fluidframework.com). See the [dds package
 README](./packages/dds/README.md) for details.
 
+## Getting started
+
+Install:
+
+`npm install fluid-ledger-dds`
+
+Set up and use a `Ledger`:
+
+```typescript
+import { Ledger } from "fluid-ledger-dds";
+
+let ledger: Ledger<number> = ...
+
+ledger.on("append", (value) => {
+  console.log(`New value appended to ledger: ${value}`);
+});
+
+for (const value of ledger.get()) {
+  // Iterate over existing values
+}
+```
+
 ## Demo app
 
 A demo app (`/packages/demo-app`) shows how `Ledger` can be used with the Fluid
