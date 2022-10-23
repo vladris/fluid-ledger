@@ -1,35 +1,33 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import { FluidClient } from "./container";
-import { Ledger } from "@fluid-ledger/dds"
+import { Ledger } from "@fluid-ledger/dds";
+import { useState } from "react";
+import ReactDOM from "react-dom/client";
+import { ColoringCanvas } from "./coloringCanvas";
+import { ColorOperation } from "./colorOperation";
+import { ColorPalette } from "./colorPalette";
+import { getLedger } from "./container";
+import { OpList } from "./opList";
 
-async function setup() {
-    const fc = new FluidClient();
+type ColoringProps = { ledger: Ledger<ColorOperation> }
 
-    await fc.initialize();
+function Coloring(props: ColoringProps) {
+    const { ledger } = props;
+    const [currentColor, setCurrentColor] = useState(0xffffff);
 
-    fc.getLedger().on("append", (value) => {
-        console.log(value);
-    });
+    return (<div style={{ display: "flex" }}>
+        <div>
+            <ColorPalette onColorChange={(color) => setCurrentColor(color)}></ColorPalette>
+            <ColoringCanvas image="./llama.png" ledger={ledger} currentColor={currentColor}></ColoringCanvas>
+        </div>
+        <div>
+            <OpList ledger={ledger}></OpList>
+        </div>
+    </div>)
+}
 
-    return fc.getLedger();
-};
-
-let ledger: Ledger | undefined;
-
-ReactDOM.render(
-    <React.StrictMode>
-        <span>Hello!</span>
-        <form><input id="inp"></input></form>
-        <button onClick={async () => ledger = await setup()}>Init</button>
-        <button onClick={() => ledger!.append((document.getElementById("inp") as HTMLInputElement).value)}>Append</button>
-        <button onClick={() => {
-            console.clear();
-            for (const item of ledger!.get()) {
-                console.log(item);
-            }
-        }}>Iterate</button>
-    </React.StrictMode>, 
-
-    document.getElementById("root")
-);
+getLedger().then((ledger) => {
+    const root = ReactDOM.createRoot(document.getElementById("root")!);
+    
+    root.render(
+        <Coloring ledger={ledger}></Coloring>
+    );
+});
