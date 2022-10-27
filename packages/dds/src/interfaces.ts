@@ -4,25 +4,10 @@ import {
 } from "@fluidframework/shared-object-base";
 import { Serializable } from "@fluidframework/datastore-definitions";
 
-// Ledger events. Currently only supporting an "append" event fired when a new
-// item gets appended to the list.
-
 /**
- * Ledger events.
+ * Base interface for common ledger actions.
  */
-export interface ILedgerEvents<T> extends ISharedObjectEvents {
-    /**
-     * "append" event fires when a value is appended to the ledger.
-     */
-    (event: "append", listener: (value: Serializable<T>) => void): void;
-}
-
-// Ledger interface. get() iterates over the list, append() appends a value.
-
-/**
- * Ledger interface.
- */
-export interface ILedger<T = any> extends ISharedObject<ILedgerEvents<T>> {
+interface ILedgerActions<T = any> {
     /**
      * Gets an iterable iterator over the ledger.
      *
@@ -39,3 +24,49 @@ export interface ILedger<T = any> extends ISharedObject<ILedgerEvents<T>> {
      */
     append(value: Serializable<T>): void;
 }
+
+/**
+ * Ledger events.
+ */
+export interface ILedgerEvents<T> extends ISharedObjectEvents {
+    /**
+     * "append" event fires when a value is appended to the ledger.
+     */
+    (event: "append", listener: (value: Serializable<T>) => void): void;
+}
+
+/**
+ * Ledger interface.
+ */
+export interface ILedger<T = any>
+    extends ILedgerActions<T>,
+        ISharedObject<ILedgerEvents<T>> {}
+
+/**
+ * Clearable ledger events
+ */
+export interface IClearableLedgerEvents<T> extends ILedgerEvents<T> {
+    /**
+     * "clear" event fires on clear and hands off a copy of the ledger to
+     * subscribers.
+     */
+    (event: "clear", listener: (values: Serializable<T>[]) => void): void;
+}
+
+/**
+ * Clearable ledger interface.
+ */
+export interface IClearableLedger<T = any>
+    extends ILedgerActions<T>,
+        ISharedObject<IClearableLedgerEvents<T>> {
+    /**
+     * Clears the ledger.
+     */
+    clear(): void;
+}
+
+/**
+ * A function that processes the values in the ledger and returns an updated
+ * version.
+ */
+export type LedgerCompactor<T> = (values: T[]) => T[];
