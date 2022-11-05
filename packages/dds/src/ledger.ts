@@ -1,17 +1,26 @@
 import {
-    ISequencedDocumentMessage,
-    MessageType
-} from "@fluidframework/protocol-definitions";
-import { ISharedObjectEvents } from "@fluidframework/shared-object-base";
-import {
     IChannelAttributes,
     IFluidDataStoreRuntime,
     IChannelFactory,
     Serializable
 } from "@fluidframework/datastore-definitions";
-import { ILedgerEvents } from "./interfaces";
+import { ISharedObjectEvents } from "@fluidframework/shared-object-base";
+import { ILedger, ILedgerEvents } from "./interfaces";
 import { LedgerFactory } from "./ledgerFactory";
-import { BaseLedger, ILedgerOperation } from "./baseLedger";
+import { BaseLedger } from "./baseLedger";
+
+/**
+ * Ledger delta operations.
+ */
+export type ILedgerOperation = IAppendOperation;
+
+/**
+ * Append operation consists of a value (to be appended to the ledger).
+ */
+export interface IAppendOperation {
+    type: "append";
+    value: any;
+}
 
 /**
  * Ledger DDS represents a distributed append-only list. Clients use the
@@ -24,10 +33,13 @@ import { BaseLedger, ILedgerOperation } from "./baseLedger";
  * list until the we get the op back from the service.
  */
 export class Ledger<
-    T = any,
-    TEvents extends ISharedObjectEvents = ILedgerEvents<T>
-> extends BaseLedger<T, TEvents> {
-    public static readonly Type = "fluid-ledger-dds";
+        T = any,
+        TEvents extends ISharedObjectEvents = ILedgerEvents<T>
+    >
+    extends BaseLedger<T, TEvents>
+    implements ILedger<T>
+{
+    public static readonly Type: string = "fluid-ledger-dds";
 
     /**
      * Creates a new Ledger.
@@ -65,16 +77,30 @@ export class Ledger<
     }
 
     /**
-     * Process a ledger message.
+     * Appends a value to the ledger. Actual append happens only after op is
+     * sequenced, wait for the "append" event before assuming the value is
+     * part of the ledger.
      *
-     * @param message - the message to process.
+     * @param value - value to append to the ledger.
      */
-    protected processCore(message: ISequencedDocumentMessage) {
-        // For incoming messages, we don't really care which client they come from.
-        // We append them to the list in the order they arrive and emit "append" events for each.
-        if (message.type === MessageType.Operation) {
-            const op = message.contents as ILedgerOperation;
-            this.appendCore(op.value);
+    public append(value: Serializable<T>) {
+        const op: IAppendOperation = {
+            type: "append",
+            value: this.serializer.encode(value, this.handle)
+        };
+
+        this.invokeOp(op);
+    }
+
+    protected handleOp(op: ILedgerOperation): void {
+        switch (op.type) {
+            case "append":
+                this.data.push(op.value);
+                this.emit("append", op.value);
+                break;
+
+            default:
+                throw new Error(`Unsupported op type ${op.type}`);
         }
     }
 }

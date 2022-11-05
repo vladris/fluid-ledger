@@ -70,3 +70,7 @@ export interface IClearableLedger<T = any>
  * version.
  */
 export type LedgerCompactor<T> = (values: T[]) => T[];
+
+export interface ICompactableLedgerEvents<T> extends ILedgerEvents<T> {
+    (event: "compact", listener: (values: Serializable<T>[]) => void): void;
+}

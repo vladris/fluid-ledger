@@ -1,15 +1,11 @@
 import {
-    ISequencedDocumentMessage,
-    MessageType
-} from "@fluidframework/protocol-definitions";
-import {
     IChannelAttributes,
     IFluidDataStoreRuntime,
     IChannelFactory
 } from "@fluidframework/datastore-definitions";
 import { IClearableLedger, IClearableLedgerEvents } from "./interfaces";
 import { LedgerFactory } from "./ledgerFactory";
-import { BaseLedger, IAppendOperation } from "./baseLedger";
+import { IAppendOperation, Ledger } from "./ledger";
 
 /**
  * ClearableLedger delta operations - Append or Clear.
@@ -29,10 +25,10 @@ interface IClearOperation {
  * ledger.
  */
 export class ClearableLedger<T = any>
-    extends BaseLedger<T, IClearableLedgerEvents<T>>
+    extends Ledger<T, IClearableLedgerEvents<T>>
     implements IClearableLedger<T>
 {
-    public static readonly Type = "fluid-clearable-ledger-dds";
+    public static readonly Type: string = "fluid-clearable-ledger-dds";
 
     /**
      * Creates a new ClearableLedger.
@@ -77,44 +73,18 @@ export class ClearableLedger<T = any>
      * Wait for "clear" event before assuming ledger is empty.
      */
     public clear() {
-        // When attached, we submit the op and only update data once the op gets sequenced.
-        if (this.isAttached()) {
-            const op: IClearOperation = {
-                type: "clear"
-            };
-
-            this.submitLocalMessage(op);
-        }
-        // If container is detached, we update data right away.
-        else {
-            this.clearCore();
-        }
+        this.invokeOp({ type: "clear" });
     }
 
-    /**
-     * Process a ledger message.
-     *
-     * @param message - the message to process.
-     */
-    protected override processCore(message: ISequencedDocumentMessage) {
-        // For incoming messages, we don't really care which client they come from.
-        if (message.type === MessageType.Operation) {
-            const op = message.contents as IClearableLedgerOperation;
+    protected handleOp(op: IClearableLedgerOperation): void {
+        switch (op.type) {
+            case "clear":
+                this.emit("clear", this.data);
+                this.data = [];
+                break;
 
-            switch (op.type) {
-                case "append":
-                    this.appendCore(op.value);
-                    break;
-
-                case "clear":
-                    this.clearCore();
-                    break;
-            }
+            default:
+                super.handleOp(op);
         }
-    }
-
-    private clearCore() {
-        this.emit("clear", this.data);
-        this.data = [];
     }
 }
