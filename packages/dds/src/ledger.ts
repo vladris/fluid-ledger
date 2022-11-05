@@ -2,37 +2,16 @@ import {
     ISequencedDocumentMessage,
     MessageType
 } from "@fluidframework/protocol-definitions";
+import { ISharedObjectEvents } from "@fluidframework/shared-object-base";
 import {
     IChannelAttributes,
     IFluidDataStoreRuntime,
-    IChannelStorageService,
     IChannelFactory,
     Serializable
 } from "@fluidframework/datastore-definitions";
-import { ISummaryTreeWithStats } from "@fluidframework/runtime-definitions";
-import { readAndParse } from "@fluidframework/driver-utils";
-import {
-    createSingleBlobSummary,
-    IFluidSerializer,
-    SharedObject
-} from "@fluidframework/shared-object-base";
-import { ILedger, ILedgerEvents } from "./interfaces";
+import { ILedgerEvents } from "./interfaces";
 import { LedgerFactory } from "./ledgerFactory";
-
-/**
- * Ledger delta operations - currently only supporting an Append operation.
- */
-type ILedgerOperation = IAppendOperation;
-
-/**
- * Append operation consists of a value (to be appended to the ledger).
- */
-interface IAppendOperation {
-    type: "append";
-    value: any;
-}
-
-const snapshotFileName = "header";
+import { BaseLedger, ILedgerOperation } from "./baseLedger";
 
 /**
  * Ledger DDS represents a distributed append-only list. Clients use the
@@ -44,10 +23,12 @@ const snapshotFileName = "header";
  * items, which means calling append() locally does not update the underlying
  * list until the we get the op back from the service.
  */
-export class Ledger<T = any>
-    extends SharedObject<ILedgerEvents<T>>
-    implements ILedger<T>
-{
+export class Ledger<
+    T = any,
+    TEvents extends ISharedObjectEvents = ILedgerEvents<T>
+> extends BaseLedger<T, TEvents> {
+    public static readonly Type = "fluid-ledger-dds";
+
     /**
      * Creates a new Ledger.
      *
@@ -56,7 +37,7 @@ export class Ledger<T = any>
      * @returns newly crated ledger (not attached yet).
      */
     public static create(runtime: IFluidDataStoreRuntime, id?: string) {
-        return runtime.createChannel(id, LedgerFactory.Type) as Ledger;
+        return runtime.createChannel(id, Ledger.Type) as Ledger;
     }
 
     /**
@@ -65,11 +46,8 @@ export class Ledger<T = any>
      * @returns a factory that creates and loads Ledger objects.
      */
     public static getFactory(): IChannelFactory {
-        return new LedgerFactory();
+        return new LedgerFactory(Ledger);
     }
-
-    // Internally the ledger is an array of values.
-    private data: Serializable<T>[] = [];
 
     /**
      * Constructs a new Ledger.
@@ -83,100 +61,7 @@ export class Ledger<T = any>
         runtime: IFluidDataStoreRuntime,
         attributes: IChannelAttributes
     ) {
-        super(id, runtime, attributes, "fluid_ledger_");
-    }
-
-    /**
-     * Gets an iterable iterator over the ledger.
-     *
-     * @returns - iterable iterator.
-     */
-    public get(): IterableIterator<Serializable<T>> {
-        return this.data[Symbol.iterator]();
-    }
-
-    /**
-     * Appends a value to the ledger. Actual append happens only after op is
-     * sequenced, wait for the "append" event before assuming the value is
-     * part of the ledger.
-     *
-     * @param value - value to append to the ledger.
-     */
-    public append(value: Serializable<T>) {
-        const opValue = this.serializer.encode(value, this.handle);
-
-        // We have very different code paths depending on whether container is attached or not.
-        // When attached, we submit the op and only update data once the op gets sequenced.
-        if (this.isAttached()) {
-            const op: IAppendOperation = {
-                type: "append",
-                value: opValue
-            };
-
-            this.applyInnerOp(op);
-        }
-        // If container is detached, we update data right away and emit the append event.
-        else {
-            this.appendCore(opValue);
-        }
-    }
-
-    /**
-     * Creates a summary for the ledger.
-     *
-     * @param serializer - Fluid serializer.
-     * @returns summary of ledger.
-     */
-    protected summarizeCore(
-        serializer: IFluidSerializer
-    ): ISummaryTreeWithStats {
-        return createSingleBlobSummary(
-            snapshotFileName,
-            serializer.stringify(this.data, this.handle)
-        );
-    }
-
-    /**
-     * Loads ledger data from storage.
-     *
-     * @param storage - storage service to hydrate from/
-     */
-    protected async loadCore(storage: IChannelStorageService): Promise<void> {
-        const content = await readAndParse<Serializable<T>[]>(
-            storage,
-            snapshotFileName
-        );
-        this.data = this.serializer.decode(content);
-    }
-
-    /**
-     * Initialize local data.
-     */
-    protected initializeLocalCore() {
-        this.data = [];
-    }
-
-    /**
-     * Callback on disconnect.
-     */
-    protected onDisconnect() {}
-
-    /**
-     * Apply inner op.
-     *
-     * @param content - ILedgerOperation content.
-     */
-    private applyInnerOp(content: ILedgerOperation) {
-        switch (content.type) {
-            case "append":
-                // "Applying the op" in our case means just submitting the message.
-                // We don't update the actual list until we get the op back from the service.
-                this.submitLocalMessage(content);
-                break;
-
-            default:
-                throw new Error("Unknown operation");
-        }
+        super(id, runtime, attributes);
     }
 
     /**
@@ -191,23 +76,5 @@ export class Ledger<T = any>
             const op = message.contents as ILedgerOperation;
             this.appendCore(op.value);
         }
-    }
-
-    /**
-     * Actually append value to ledger and fire event.
-     *
-     * @param value - value to append.
-     */
-    private appendCore(value: Serializable<T>) {
-        this.data.push(value);
-        this.emit("append", value);
-    }
-
-    /**
-     * Applies a stashed op - not supported for ledger.
-     */
-    protected applyStashedOp(content: unknown) {
-        // We don't support offline mode
-        throw Error("Not supported");
     }
 }

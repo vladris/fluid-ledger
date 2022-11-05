@@ -14,7 +14,7 @@ function createLocalLedger() {
     return new Ledger(
         "ledger",
         new MockFluidDataStoreRuntime(),
-        LedgerFactory.Attributes
+        new LedgerFactory(Ledger).attributes
     );
 }
 
@@ -26,7 +26,11 @@ function createConnectedLedger(
     const containerRuntime =
         runtimeFactory.createContainerRuntime(dataStoreRuntime);
 
-    const ledger = new Ledger(id, dataStoreRuntime, LedgerFactory.Attributes);
+    const ledger = new Ledger(
+        id,
+        dataStoreRuntime,
+        new LedgerFactory(Ledger).attributes
+    );
     ledger.connect({
         deltaConnection: containerRuntime.createDeltaConnection(),
         objectStorage: new MockStorage()
@@ -42,7 +46,11 @@ function createLedgerForReconnection(
     const containerRuntime =
         runtimeFactory.createContainerRuntime(dataStoreRuntime);
 
-    const ledger = new Ledger(id, dataStoreRuntime, LedgerFactory.Attributes);
+    const ledger = new Ledger(
+        id,
+        dataStoreRuntime,
+        new LedgerFactory(Ledger).attributes
+    );
     ledger.connect({
         deltaConnection: containerRuntime.createDeltaConnection(),
         objectStorage: new MockStorage()
@@ -86,7 +94,7 @@ describe("Ledger", () => {
             const loadedLedger = new Ledger(
                 "loadedLedger",
                 new MockFluidDataStoreRuntime(),
-                LedgerFactory.Attributes
+                new LedgerFactory(Ledger).attributes
             );
             await loadedLedger.load(services);
 
