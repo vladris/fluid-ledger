@@ -52,6 +52,9 @@ export function ColoringCanvas(props: ColoringCanvasProps) {
         ledger.on("append", (op) => {
             setColorOperations(Array.from(ledger.get()));
         });
+        ledger.on("clear", () => {
+            setColorOperations([]);
+        })
         setColorOperations(Array.from(ledger.get()));
     }, [ledger]);
 

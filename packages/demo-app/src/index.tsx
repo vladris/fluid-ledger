@@ -16,6 +16,7 @@ function Coloring(props: ColoringProps) {
     return (<div style={{ display: "flex" }}>
         <div>
             <ColorPalette onColorChange={(color) => setCurrentColor(color)}></ColorPalette>
+            <button type="button" style={{ display: "block" }} onClick={() => ledger.clear()}>Clear</button>
             <ColoringCanvas image="./llama.png" ledger={ledger} currentColor={currentColor}></ColoringCanvas>
         </div>
         <div>

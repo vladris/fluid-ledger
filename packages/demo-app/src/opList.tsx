@@ -20,6 +20,14 @@ export function OpList(props: OpListProps) {
         textArea.current.value += `x: ${op.x}, y: ${op.y}, color: #${op.color.toString(16).padStart(6, "0")}\n`;
     }
 
+    const clearLog = () => {
+        if (!textArea.current) {
+            return;
+        }
+
+        textArea.current.value = "*** Ledger cleared ***\n";
+    }
+
     useEffect(() => {
         if (textArea.current) {
             textArea.current.value = "";
@@ -32,6 +40,9 @@ export function OpList(props: OpListProps) {
 
         // Log future color operations
         ledger.on("append", logOp);
+
+        // Clear log on clear event
+        ledger.on("clear", clearLog);
     }, [ledger]);
 
     return (<div style={{ padding: 50 }}>
