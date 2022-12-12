@@ -14,7 +14,7 @@ ledger values that were cleared. Listeners can use these to react to changes.
 
 The DDS provides a `get()` method which returns an iterable iterator over the
 underlying list, an `append()` method which submits a new item to be appended to
-the list, and a `clear()` method which clear the list. Client shouldn't assume
+the list, and a `clear()` method which clears the list. Client shouldn't assume
 the data is immediately appended (or cleared), rather wait for the events (other
 append or clear operations incoming from other clients might be interleaved).
 
