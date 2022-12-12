@@ -32,8 +32,9 @@ to create/load a container, and access the data structure.*
 `src/opList.tsx` is a React component that provides a view into the ledger. It
 displays all contained `ColorOperation` objects in a text area. The component
 takes a `Ledger<ColorOperation>` as a prop, it logs all existing ledger
-objects (as returned by `get()`), and subscribes to the `append` event so it
-will also logs all future incoming operations.
+objects (as returned by `get()`), and subscribes to the `append` and `clear`
+events. It also logs all future incoming operations. The op list is cleared on
+`clear`.
 
 *This is a simple example of consuming a `Ledger` DDS.*
 
@@ -57,6 +58,7 @@ educational perspective.*
 It loads the llama image and takes a `Ledger<ColorOperation>` as a prop. It
 maintains a `colorOperations` state which is kept in sync with the ledger.
 Whenever an `append` fires, the state is updated and the canvas is repainted.
+Whenever a `clear` firest, the canvas is repainted (to initial state).
 
 *This is a more complex example of using a `Ledger` DDS in a collaborative
 scenario, powered by a React component.*

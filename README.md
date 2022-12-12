@@ -23,9 +23,19 @@ ledger.on("append", (value) => {
   console.log(`New value appended to ledger: ${value}`);
 });
 
+ledger.on("clear", (values) => {
+  console.log(`Ledger was cleared. It contained: ${values}`);
+});
+
+// Append a value to the ledger
+ledger.append(42);
+
 for (const value of ledger.get()) {
   // Iterate over existing values
 }
+
+// Clear ledger
+ledger.clear();
 ```
 
 ## Demo app
