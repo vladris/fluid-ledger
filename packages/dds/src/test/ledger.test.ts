@@ -75,6 +75,14 @@ describe("Ledger", () => {
             expect(Array.from(ledger.get())).toStrictEqual(["item1", "item2"]);
         });
 
+        it("Can clear ledger", () => {
+            ledger.append("item1");
+            ledger.append("item2");
+            ledger.clear();
+
+            expect(Array.from(ledger.get())).toStrictEqual([]);
+        });
+
         it("Can load from snapshot", async () => {
             ledger.append("item1");
             ledger.append("item2");
@@ -103,6 +111,17 @@ describe("Ledger", () => {
             });
 
             ledger.append("item");
+
+            expect(called).toBe(true);
+        });
+
+        it("Clear fires immediately", () => {
+            let called = false;
+            ledger.on("clear", () => {
+                called = true;
+            });
+
+            ledger.clear();
 
             expect(called).toBe(true);
         });
@@ -156,6 +175,49 @@ describe("Ledger", () => {
             });
 
             ledger1.append("value");
+
+            expect(called1).toBe(false);
+            expect(called2).toBe(false);
+
+            containerRuntimeFactory.processAllMessages();
+
+            expect(called1).toBe(true);
+            expect(called2).toBe(true);
+        });
+
+        it("Can clear", () => {
+            // Client 1 appends
+            ledger1.append("value1");
+
+            containerRuntimeFactory.processAllMessages();
+
+            expect(Array.from(ledger1.get())).toStrictEqual(["value1"]);
+            expect(Array.from(ledger2.get())).toStrictEqual(["value1"]);
+
+            // Client 2 clears
+            ledger2.clear();
+
+            containerRuntimeFactory.processAllMessages();
+
+            expect(Array.from(ledger1.get())).toStrictEqual([]);
+            expect(Array.from(ledger2.get())).toStrictEqual([]);
+        });
+
+        it("Clear fires after sequencing", () => {
+            let called1 = false;
+            let called2 = false;
+
+            ledger1.on("clear", (values) => {
+                expect(values).toStrictEqual(["value"]);
+                called1 = true;
+            });
+            ledger2.on("clear", (values) => {
+                expect(values).toStrictEqual(["value"]);
+                called2 = true;
+            });
+
+            ledger1.append("value");
+            ledger2.clear();
 
             expect(called1).toBe(false);
             expect(called2).toBe(false);
@@ -236,6 +298,35 @@ describe("Ledger", () => {
             containerRuntimeFactory.processAllMessages();
 
             // Append should have fired after connecting
+            expect(called).toBe(true);
+        });
+
+        it("Clear fires after sequencing", () => {
+            let called = false;
+            ledger1.on("clear", () => {
+                called = true;
+            });
+
+            // Append a value
+            ledger1.append("value");
+
+            // Disconnect
+            containerRuntime1.connected = false;
+
+            // Clear while disconnected
+            ledger1.clear();
+
+            containerRuntimeFactory.processAllMessages();
+
+            // Clear should not have fired
+            expect(called).toBe(false);
+
+            // Reconnect
+            containerRuntime1.connected = true;
+
+            containerRuntimeFactory.processAllMessages();
+
+            // Clear should have fired after connecting
             expect(called).toBe(true);
         });
     });

@@ -20,9 +20,9 @@ import { ILedger, ILedgerEvents } from "./interfaces";
 import { LedgerFactory } from "./ledgerFactory";
 
 /**
- * Ledger delta operations - currently only supporting an Append operation.
+ * Ledger delta operations - Append or Clear.
  */
-type ILedgerOperation = IAppendOperation;
+type ILedgerOperation = IAppendOperation | IClearOperation;
 
 /**
  * Append operation consists of a value (to be appended to the ledger).
@@ -30,6 +30,13 @@ type ILedgerOperation = IAppendOperation;
 interface IAppendOperation {
     type: "append";
     value: any;
+}
+
+/**
+ * Clear operation signals clearing the ledger.
+ */
+interface IClearOperation {
+    type: "clear";
 }
 
 const snapshotFileName = "header";
@@ -122,6 +129,26 @@ export class Ledger<T = any>
     }
 
     /**
+     * Clears the ledger. Actual clear happens only after op is sequenced,
+     * wait for the "clear" event before assuming the ledger is clear.
+     */
+    public clear() {
+        // We have very different code paths depending on whether container is attached or not.
+        // When attached, we submit the op and only update data once the op gets sequenced.
+        if (this.isAttached()) {
+            const op: IClearOperation = {
+                type: "clear"
+            };
+
+            this.applyInnerOp(op);
+        }
+        // If container is detached, we clear data right away and emit the clear event.
+        else {
+            this.clearCore();
+        }
+    }
+
+    /**
      * Creates a summary for the ledger.
      *
      * @param serializer - Fluid serializer.
@@ -169,6 +196,7 @@ export class Ledger<T = any>
     private applyInnerOp(content: ILedgerOperation) {
         switch (content.type) {
             case "append":
+            case "clear":
                 // "Applying the op" in our case means just submitting the message.
                 // We don't update the actual list until we get the op back from the service.
                 this.submitLocalMessage(content);
@@ -186,10 +214,19 @@ export class Ledger<T = any>
      */
     protected processCore(message: ISequencedDocumentMessage) {
         // For incoming messages, we don't really care which client they come from.
-        // We append them to the list in the order they arrive and emit "append" events for each.
         if (message.type === MessageType.Operation) {
             const op = message.contents as ILedgerOperation;
-            this.appendCore(op.value);
+
+            switch (op.type) {
+                case "append":
+                    this.appendCore(op.value);
+                    break;
+                case "clear":
+                    this.clearCore();
+                    break;
+                default:
+                    throw new Error("Unknown operation");
+            }
         }
     }
 
@@ -201,6 +238,20 @@ export class Ledger<T = any>
     private appendCore(value: Serializable<T>) {
         this.data.push(value);
         this.emit("append", value);
+    }
+
+    /**
+     * Clear ledger and fire event.
+     */
+    private clearCore() {
+        // Clone ledger
+        const data = this.data.slice();
+
+        // Clear data
+        this.data = [];
+
+        // Fire "clear" with cloned ledger
+        this.emit("clear", data);
     }
 
     /**
