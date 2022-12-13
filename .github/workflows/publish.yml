@@ -3,8 +3,8 @@ name: Publish to NPM
 on:
   push:
     tags:
-      - '*'
-      
+      - "*"
+
   workflow_dispatch:
 
 permissions:
@@ -19,6 +19,7 @@ jobs:
         with:
           node-version: 16
       - run: npm ci
+      - run: npm run build --workspace=fluid-ledger-dds
       - run: npm test
 
   publish-npm:
