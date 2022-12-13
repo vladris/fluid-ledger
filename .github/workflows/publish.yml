@@ -19,7 +19,6 @@ jobs:
         with:
           node-version: 16
       - run: npm ci
-      - run: npm run build --workspace=fluid-ledger-dds
       - run: npm test
 
   publish-npm:
@@ -31,6 +30,8 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
+      - run: npm ci
+      - run: npm run build --workspace=fluid-ledger-dds
       - run: npm publish --workspace=fluid-ledger-dds
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
