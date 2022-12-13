@@ -1,0 +1,4 @@
+**/node_modules/**
+packages/dds/coverage/**
+packages/dds/test/**
+tsconfig.tsbuildinfo
